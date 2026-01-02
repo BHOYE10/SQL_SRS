@@ -2,8 +2,15 @@ import streamlit as st
 import pandas as pd
 import duckdb
 
-st.write("hello world")
+st.write("""#SQL_SRS
+         space repetition systeme SQL practice """)
 
+st.write("hello world")
+option=st.selectbox("what would you like to review ?", ["JOIN","GROUP BY" ,"WINDOW FUNCTION"],
+                     index=None ,
+                     placeholder="Select a theme ...",)
+
+st.write("you selected :" ,option)
 data={"a" : [1 ,2 ,3], "b" : [3 ,4 ,5]}
 df=pd.DataFrame(data)
 
@@ -16,8 +23,6 @@ with tab1:
     request=duckdb.query(request_sql).df()
     st.write(f"this is your request : {request_sql}")
     st.dataframe(request)
-
-
 
 
 with tab2:
