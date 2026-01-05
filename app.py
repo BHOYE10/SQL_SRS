@@ -3,15 +3,12 @@ import pandas as pd
 import duckdb
 import io
 
-
 csv = """beverage,price
 orange juice,2.5
 Espresso,2
 Tea,3
 """
-
 beverages = pd.read_csv(io.StringIO(csv))
-
 
 csv2 = """food_item,food_price
 cookie juice,2.5
@@ -26,6 +23,12 @@ answer="""select*
           cross join food_items 
            """
 solution=duckdb.query(answer).df()
+
+with st.sidebar:
+    option=st.selectbox("what would you like to review ?", ["JOIN","GROUP BY" ,"WINDOW FUNCTION"],
+                     index=None ,
+                     placeholder="Select a theme ...",)
+    st.write("you selected :" ,option)
 
 st.header("enter your code ")
 
