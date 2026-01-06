@@ -18,27 +18,30 @@ muffin,3
 
 food_items = pd.read_csv(io.StringIO(csv2))
 
-answer="""select* 
+answer = """select* 
           from beverages
           cross join food_items 
            """
-solution=duckdb.query(answer).df()
+solution = duckdb.query(answer).df()
 
 with st.sidebar:
-    option=st.selectbox("what would you like to review ?", ["JOIN","GROUP BY" ,"WINDOW FUNCTION"],
-                     index=None ,
-                     placeholder="Select a theme ...",)
-    st.write("you selected :" ,option)
+    option = st.selectbox(
+        "what would you like to review ?",
+        ["JOIN", "GROUP BY", "WINDOW FUNCTION"],
+        index=None,
+        placeholder="Select a theme ...",
+    )
+    st.write("you selected :", option)
 
 st.header("enter your code ")
 
-query=st.text_area(label="enter your request" ,key="user_input")
+query = st.text_area(label="enter your request", key="user_input")
 
 if query:
-    resultat=duckdb.query(query).df()
+    resultat = duckdb.query(query).df()
     st.dataframe(resultat)
 
-tab2,tab3=st.tabs(["tables","solution"])
+tab2, tab3 = st.tabs(["tables", "solution"])
 
 with tab2:
     st.write("table : beverages")
