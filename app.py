@@ -1,33 +1,55 @@
 import streamlit as st
 import pandas as pd
 import duckdb
+import io
 
-st.write("""#SQL_SRS
-         space repetition systeme SQL practice """)
+csv = """beverage,price
+orange juice,2.5
+Espresso,2
+Tea,3
+"""
+beverages = pd.read_csv(io.StringIO(csv))
 
-st.write("hello world")
-option=st.selectbox("what would you like to review ?", ["JOIN","GROUP BY" ,"WINDOW FUNCTION"],
-                     index=None ,
-                     placeholder="Select a theme ...",)
+csv2 = """food_item,food_price
+cookie juice,2.5
+chocolate,2
+muffin,3
+"""
 
-st.write("you selected :" ,option)
-data={"a" : [1 ,2 ,3], "b" : [3 ,4 ,5]}
-df=pd.DataFrame(data)
+food_items = pd.read_csv(io.StringIO(csv2))
 
-tab1,tab2,tab3=st.tabs(["cat","dog","owl"])
+answer = """select* 
+          from beverages
+          cross join food_items 
+           """
+solution = duckdb.query(answer).df()
 
-with tab1:
-    #st.header("a cat")
-    #st.image("https://static.streamlit.io/examples/cat.jpg" , width=200)
-    request_sql=st.text_area(label="enter your input")
-    request=duckdb.query(request_sql).df()
-    st.write(f"this is your request : {request_sql}")
-    st.dataframe(request)
+with st.sidebar:
+    option = st.selectbox(
+        "what would you like to review ?",
+        ["JOIN", "GROUP BY", "WINDOW FUNCTION"],
+        index=None,
+        placeholder="Select a theme ...",
+    )
+    st.write("you selected :", option)
 
+st.header("enter your code ")
+
+query = st.text_area(label="enter your request", key="user_input")
+
+if query:
+    resultat = duckdb.query(query).df()
+    st.dataframe(resultat)
+
+tab2, tab3 = st.tabs(["tables", "solution"])
 
 with tab2:
-    st.header("a lyon")
-    st.image("https://static.streamlit.io/examples/dog.jpg" , width=200)
+    st.write("table : beverages")
+    st.dataframe(beverages)
+    st.write("table : food_items")
+    st.dataframe(food_items)
+    st.write("expected :")
+    st.dataframe(solution)
+
 with tab3:
-    st.header("a owl")
-    st.image("https://static.streamlit.io/examples/owl.jpg" , width=200)
+    st.write(answer)
