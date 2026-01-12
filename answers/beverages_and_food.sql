@@ -1,2 +1,2 @@
-"select* from beverages
-cross join food_items"
+select* from beverages
+cross join food_items
