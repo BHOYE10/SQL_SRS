@@ -3,8 +3,8 @@ import duckdb
 
 #answer = """select*
 #          from beverages
- #         cross join food_items
-  #         """
+#          cross join food_items
+#         """
 #solution = duckdb.query(answer).df()
 
 con=duckdb.connect(database="data/exercises_sql.duckdb", read_only=False)
@@ -12,7 +12,7 @@ con=duckdb.connect(database="data/exercises_sql.duckdb", read_only=False)
 with st.sidebar:
     theme = st.selectbox(
         "what would you like to review ?",
-        ["CROSS JOIN", "GROUP BY", "WINDOW FUNCTION"],
+        ["CROSS_JOIN", "WINDOWS_FUNCTION", "GROUP_BY"],
         index=None,
         placeholder="Select a theme ...",
     )
@@ -24,19 +24,28 @@ st.header("enter your code ")
 
 query = st.text_area(label="enter your request", key="user_input")
 
-#if query:
-#resultat = duckdb.query(query).df()
-#st.dataframe(resultat)
+if query:
+    result=con.execute(query).df()
+    st.dataframe(result)
 
-#, tab3 = st.tabs(["tables", "solution"])
 
-# tab2:
-#st.write("table : beverages")
-#st.dataframe(beverages)
+tab2, tab3 = st.tabs(["tables", "solution"])
+with tab2:
+    exercise_table=exercise.loc[0,"tables"]
+    for table in exercise_table:
+        st.write(f"table: {table}")
+        df_table=con.execute(f"select* from {table}").df()
+        st.dataframe(df_table)
+        #st.write("table : beverages")
+        #st.dataframe(beverages)
 #st.write("table : food_items")
 #st.dataframe(food_items)
 #st.write("expected :")
 #st.dataframe(solution)
 
-# tab3:
-#st.write(answer)
+with tab3:
+    answer_str= exercise.loc[0, "exercise_name"]
+    with open(f"answers/{answer_str}.sql" , "r") as f:
+        answer=f.read()
+        st.write(answer)
+
