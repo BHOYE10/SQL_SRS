@@ -1,12 +1,6 @@
 import streamlit as st
 import duckdb
 
-#answer = """select*
-#          from beverages
-#          cross join food_items
-#         """
-#solution = duckdb.query(answer).df()
-
 con=duckdb.connect(database="data/exercises_sql.duckdb", read_only=False)
 
 with st.sidebar:
@@ -20,6 +14,14 @@ with st.sidebar:
     exercise=con.execute(f"select* from memory_state where theme='{theme}'").df()
     st.write(exercise)
 
+    answer_str= exercise.loc[0, "exercise_name"]
+    if answer_str:
+        with open(f"answers/{answer_str}.sql" , "r") as f:
+            answer=f.read()
+            solution_df=con.execute(answer).df()
+    else:
+        st.write("you don't have any exercise")
+
 st.header("enter your code ")
 
 query = st.text_area(label="enter your request", key="user_input")
@@ -27,6 +29,15 @@ query = st.text_area(label="enter your request", key="user_input")
 if query:
     result=con.execute(query).df()
     st.dataframe(result)
+    try:
+        result=result[solution_df.columns]
+        st.dataframe(result.compare(solution_df))
+    except:
+        st.write("somme columns are missing")
+
+    n_line=result.shape[0] - solution_df.shape[0]
+    if n_line!=0:
+        st.write(f"the solution has {n_line} lines difference with the solution")
 
 
 tab2, tab3 = st.tabs(["tables", "solution"])
@@ -36,16 +47,7 @@ with tab2:
         st.write(f"table: {table}")
         df_table=con.execute(f"select* from {table}").df()
         st.dataframe(df_table)
-        #st.write("table : beverages")
-        #st.dataframe(beverages)
-#st.write("table : food_items")
-#st.dataframe(food_items)
-#st.write("expected :")
-#st.dataframe(solution)
 
 with tab3:
-    answer_str= exercise.loc[0, "exercise_name"]
-    with open(f"answers/{answer_str}.sql" , "r") as f:
-        answer=f.read()
         st.write(answer)
 
