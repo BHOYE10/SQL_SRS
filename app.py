@@ -10,8 +10,6 @@ if "data" not in os.listdir():
 if "exercises_sql.duckdb" not in os.listdir("data"):
     exec(open("init_db.py").read())
 
-
-
 con=duckdb.connect(database="data/exercises_sql.duckdb", read_only=False)
 
 with st.sidebar:
