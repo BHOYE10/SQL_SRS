@@ -1,11 +1,7 @@
 import streamlit as st
 import duckdb
 
-#answer = """select*
-#          from beverages
-#          cross join food_items
-#         """
-#solution = duckdb.query(answer).df()
+
 
 con=duckdb.connect(database="data/exercises_sql.duckdb", read_only=False)
 
