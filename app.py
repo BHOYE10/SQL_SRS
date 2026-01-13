@@ -1,17 +1,27 @@
 import streamlit as st
 import duckdb
+import os
+import logging
+
+if "data" not in os.listdir():
+    print("creating folder data")
+    logging.error(os.listdir())
+    os.mkdir("data")
+if "exercises_sql.duckdb" not in os.listdir("data"):
+    exec(open("init_db.py").read())
 
 con=duckdb.connect(database="data/exercises_sql.duckdb", read_only=False)
 
 with st.sidebar:
     theme = st.selectbox(
         "what would you like to review ?",
-        ["CROSS_JOIN", "WINDOWS_FUNCTION", "GROUP_BY"],
+        ["CROSS_JOIN", "GROUP_BY","WINDOWS_FUNCTION" ],
         index=None,
         placeholder="Select a theme ...",
     )
     st.write("you selected :", theme)
-    exercise=con.execute(f"select* from memory_state where theme='{theme}'").df()
+
+    exercise=con.execute(f"select* from memory_state where theme='{theme}'").df().sort_values("last_reviewed").reset_index()
     st.write(exercise)
 
     answer_str= exercise.loc[0, "exercise_name"]
@@ -51,3 +61,4 @@ with tab2:
 with tab3:
         st.write(answer)
 
+con.close()
