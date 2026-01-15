@@ -24,13 +24,26 @@ with st.sidebar:
     exercise=con.execute(f"select* from memory_state where theme='{theme}'").df().sort_values("last_reviewed").reset_index()
     st.write(exercise)
 
-st.header("enter your code ")
 
+answer_str= exercise.loc[0, "exercise_name"]
+with open(f"answers/{answer_str}.sql" , "r") as f:
+    answer=f.read()
+    solution_df=con.execute(answer).df()
+st.header("enter your code ")
 query = st.text_area(label="enter your request", key="user_input")
 
 if query:
     result=con.execute(query).df()
     st.dataframe(result)
+    try:
+        result=result[solution_df.columns]
+        st.dataframe(result.compare(solution_df))
+    except:
+        st.write("some culombs are missing")
+    n_line=solution_df.shape[0]-result.shape[0]
+    if n_line!=0:
+        st.write(f"result has a {n_line} line different with a solution")
+
 
 
 tab2, tab3 = st.tabs(["tables", "solution"])
@@ -40,17 +53,9 @@ with tab2:
         st.write(f"table: {table}")
         df_table=con.execute(f"select* from {table}").df()
         st.dataframe(df_table)
-        #st.write("table : beverages")
-        #st.dataframe(beverages)
-#st.write("table : food_items")
-#st.dataframe(food_items)
-#st.write("expected :")
-#st.dataframe(solution)
+
 
 with tab3:
-    answer_str= exercise.loc[0, "exercise_name"]
-    with open(f"answers/{answer_str}.sql" , "r") as f:
-        answer=f.read()
         st.write(answer)
 
 con.close()
