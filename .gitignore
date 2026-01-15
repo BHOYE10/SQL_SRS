@@ -1,1 +1,6 @@
-data/
+.idea/
+venv/
+*.csv
+test_db.py
+
+data

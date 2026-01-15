@@ -1,28 +1,61 @@
 import streamlit as st
-import pandas as pd
 import duckdb
+import os
+import logging
 
-st.write("hello world")
+if "data" not in os.listdir():
+    print("creating folder data")
+    logging.error(os.listdir())
+    os.mkdir("data")
+if "exercises_sql.duckdb" not in os.listdir("data"):
+    exec(open("init_db.py").read())
 
-data={"a" : [1 ,2 ,3], "b" : [3 ,4 ,5]}
-df=pd.DataFrame(data)
+con=duckdb.connect(database="data/exercises_sql.duckdb", read_only=False)
 
-tab1,tab2,tab3=st.tabs(["cat","dog","owl"])
+with st.sidebar:
+    theme = st.selectbox(
+        "what would you like to review ?",
+        ["CROSS_JOIN", "GROUP_BY","WINDOWS_FUNCTION" ],
+        index=None,
+        placeholder="Select a theme ...",
+    )
+    st.write("you selected :", theme)
 
-with tab1:
-    #st.header("a cat")
-    #st.image("https://static.streamlit.io/examples/cat.jpg" , width=200)
-    request_sql=st.text_area(label="enter your input")
-    request=duckdb.query(request_sql).df()
-    st.write(f"this is your request : {request_sql}")
-    st.dataframe(request)
+    exercise=con.execute(f"select* from memory_state where theme='{theme}'").df().sort_values("last_reviewed").reset_index()
+    st.write(exercise)
+
+
+answer_str= exercise.loc[0, "exercise_name"]
+with open(f"answers/{answer_str}.sql" , "r") as f:
+    answer=f.read()
+    solution_df=con.execute(answer).df()
+st.header("enter your code ")
+query = st.text_area(label="enter your request", key="user_input")
+
+if query:
+    result=con.execute(query).df()
+    st.dataframe(result)
+    try:
+        result=result[solution_df.columns]
+        st.dataframe(result.compare(solution_df))
+    except:
+        st.write("some culombs are missing")
+    n_line=solution_df.shape[0]-result.shape[0]
+    if n_line!=0:
+        st.write(f"result has a {n_line} line different with a solution")
 
 
 
-
+tab2, tab3 = st.tabs(["tables", "solution"])
 with tab2:
-    st.header("a lyon")
-    st.image("https://static.streamlit.io/examples/dog.jpg" , width=200)
+    exercise_table=exercise.loc[0,"tables"]
+    for table in exercise_table:
+        st.write(f"table: {table}")
+        df_table=con.execute(f"select* from {table}").df()
+        st.dataframe(df_table)
+
+
 with tab3:
-    st.header("a owl")
-    st.image("https://static.streamlit.io/examples/owl.jpg" , width=200)
+        st.write(answer)
+
+con.close()
